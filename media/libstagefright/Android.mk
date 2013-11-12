@@ -65,7 +65,6 @@ LOCAL_SRC_FILES:=                         \
 LOCAL_C_INCLUDES:= \
         $(TOP)/frameworks/av/include/media/stagefright/timedtext \
         $(TOP)/frameworks/native/include/media/hardware \
-        $(TOP)/frameworks/native/include/media/openmax \
         $(TOP)/frameworks/native/services/connectivitymanager \
         $(TOP)/external/flac/include \
         $(TOP)/external/tremolo \
@@ -82,6 +81,13 @@ ifeq ($(BOARD_USES_STE_FMRADIO),true)
 LOCAL_SRC_FILES += \
         FMRadioSource.cpp                 \
         PCMExtractor.cpp
+endif
+
+ifneq ($(TI_CUSTOM_DOMX_PATH),)
+LOCAL_C_INCLUDES += $(TI_CUSTOM_DOMX_PATH)/omx_core/inc
+LOCAL_CPPFLAGS += -DUSE_TI_CUSTOM_DOMX
+else
+LOCAL_C_INCLUDES += $(TOP)/frameworks/native/include/media/openmax
 endif
 
 ifneq ($(TARGET_QCOM_MEDIA_VARIANT),)
