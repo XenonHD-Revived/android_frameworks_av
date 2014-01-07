@@ -123,6 +123,8 @@ private:
 
     bool mDisconnectAtHighwatermark;
 
+    bool mIsNonBlockingMode;
+
     void onMessageReceived(const sp<AMessage> &msg);
     void onFetch();
     void onRead(const sp<AMessage> &msg);

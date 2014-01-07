@@ -229,6 +229,10 @@ NuCachedSource2::~NuCachedSource2() {
     mCache = NULL;
 }
 
+void NuCachedSource2::enableNonBlockingRead(bool flag) {
+    mIsNonBlockingMode = flag;
+}
+
 status_t NuCachedSource2::getEstimatedBandwidthKbps(int32_t *kbps) {
     if (mSource->flags() & kIsHTTPBasedSource) {
         HTTPBase* source = static_cast<HTTPBase *>(mSource.get());
@@ -256,7 +260,7 @@ status_t NuCachedSource2::getSize(off64_t *size) {
 uint32_t NuCachedSource2::flags() {
     // Remove HTTP related flags since NuCachedSource2 is not HTTP-based.
     uint32_t flags = mSource->flags() & ~(kWantsPrefetching | kIsHTTPBasedSource);
-    return (flags | kIsCachingDataSource);
+    return (flags | kIsCachingDataSource | kSupportNonBlockingRead);
 }
 
 void NuCachedSource2::onMessageReceived(const sp<AMessage> &msg) {
@@ -421,9 +425,12 @@ void NuCachedSource2::onRead(const sp<AMessage> &msg) {
     size_t size;
     CHECK(msg->findSize("size", &size));
 
+    int32_t isNonBlocking;
+    CHECK(msg->findInt32("isnonblocking", &isNonBlocking));
+
     ssize_t result = readInternal(offset, data, size);
 
-    if (result == -EAGAIN) {
+    if (result == -EAGAIN && !isNonBlocking) {
         msg->post(50000);
         return;
     }
@@ -470,6 +477,11 @@ void NuCachedSource2::restartPrefetcherIfNecessary_l(
 }
 
 ssize_t NuCachedSource2::readAt(off64_t offset, void *data, size_t size) {
+    return readAtInternal(offset, data, size, mIsNonBlockingMode);
+}
+
+ssize_t NuCachedSource2::readAtInternal(off64_t offset, void *data, size_t size, int32_t isNonBlocking) {
+
     Mutex::Autolock autoSerializer(mSerializer);
 
     ALOGV("readAt offset %lld, size %d", offset, size);
@@ -492,6 +504,7 @@ ssize_t NuCachedSource2::readAt(off64_t offset, void *data, size_t size) {
     msg->setInt64("offset", offset);
     msg->setPointer("data", data);
     msg->setSize("size", size);
+    msg->setInt32("isnonblocking", isNonBlocking);
 
     CHECK(mAsyncResult == NULL);
     msg->post();
