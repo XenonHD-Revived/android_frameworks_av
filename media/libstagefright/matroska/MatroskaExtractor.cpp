@@ -736,6 +736,20 @@ static void addESDSFromCodecPrivate(
 
     // Make sure all sizes can be coded in a single byte.
     CHECK(privSize + 22 - 2 < 128);
+
+    if(isAudio) {
+        ABitReader br((const uint8_t *)priv, privSize);
+        uint32_t objectType = br.getBits(5);
+
+        if (objectType == 31) {  // AAC-ELD => additional 6 bits
+            objectType = 32 + br.getBits(6);
+        }
+
+        if(objectType == 1) { //AAC Main profile
+            ALOGV("Found AAC mainprofile in Matroska Extractor");
+        }
+        meta->setInt32(kKeyAACAOT, objectType);
+    }
     size_t esdsSize = sizeof(kStaticESDS) + privSize + 1;
     uint8_t *esds = new uint8_t[esdsSize];
     memcpy(esds, kStaticESDS, sizeof(kStaticESDS));
