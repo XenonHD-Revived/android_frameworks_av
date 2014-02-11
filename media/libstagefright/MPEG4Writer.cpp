@@ -2846,9 +2846,8 @@ void MPEG4Writer::Track::writeMp4aEsdsBox() {
     mOwner->writeInt8(0x00);   // buffer size 24-bit
     int32_t bitRate;
     bool success = mMeta->findInt32(kKeyBitRate, &bitRate);
-    CHECK(success);
-    mOwner->writeInt32(bitRate); // max bit rate
-    mOwner->writeInt32(bitRate); // avg bit rate
+    mOwner->writeInt32(success ? bitRate : 96000); // max bit rate
+    mOwner->writeInt32(success ? bitRate : 96000); // avg bit rate
 
     mOwner->writeInt8(0x05);   // DecoderSpecificInfoTag
     mOwner->writeInt8(mCodecSpecificDataSize);
