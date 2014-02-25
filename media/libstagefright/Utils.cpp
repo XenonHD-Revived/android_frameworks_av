@@ -602,17 +602,6 @@ bool canOffloadStream(const sp<MetaData>& meta, bool hasVideo, const sp<MetaData
         return false;
     }
 
-    // check whether it is ELD/LD/main content -> no offloading
-    // FIXME: this should depend on audio DSP capabilities. mapMimeToAudioFormat() should use the
-    // metadata to refine the AAC format and the audio HAL should only list supported profiles.
-    int32_t aacaot = -1;
-    if (meta->findInt32(kKeyAACAOT, &aacaot)) {
-        if (aacaot == 23 || aacaot == 39 || aacaot == 1) {
-            ALOGV("track of type '%s' is ELD/LD/main content", mime);
-            return false;
-        }
-    }
-
     int32_t srate = -1;
     if (!meta->findInt32(kKeySampleRate, &srate)) {
         ALOGV("track of type '%s' does not publish sample rate", mime);
