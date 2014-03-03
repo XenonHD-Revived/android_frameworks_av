@@ -4554,6 +4554,9 @@ AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger,
 {
     snprintf(mName, kNameLength, "AudioIn_%X", id);
 
+    // initilize to clean sync event
+    clearSyncStartEvent();
+
     readInputParameters();
 }
 
