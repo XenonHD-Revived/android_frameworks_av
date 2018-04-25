@@ -83,7 +83,7 @@ LOCAL_SHARED_LIBRARIES:= \
 ifeq ($(TARGET_USES_QTI_CAMERA_DEVICE), true)
 LOCAL_CFLAGS += -DQTI_CAMERA_DEVICE
 LOCAL_SHARED_LIBRARIES += \
-	vendor.qti.hardware.camera.device@1.0
+    vendor.qti.hardware.camera.device@1.0
 endif
 
 LOCAL_EXPORT_SHARED_LIBRARY_HEADERS := libbinder libcamera_client libfmq
